@@ -1,22 +1,24 @@
 import flet as ft
+import os
 
 def main(page: ft.Page):
-    page.window_full_screen = True
+    page.window.full_screen = True
     page.padding = 0
     
     def toggle_fullscreen(e):
-        page.window_full_screen = not page.window_full_screen
+        page.window.full_screen = not page.window.full_screen
         page.update()
-
+    # Get all video files from assets/video directory
+    video_dir = "assets/video"
+    video_files = [f for f in os.listdir(video_dir) if f.endswith(('.mp4', '.avi', '.mov'))]
+    
+    # Create a playlist with all video files
+    playlist = [ft.VideoMedia(os.path.join(video_dir, video)) for video in video_files]
+    
     video = ft.Video(
-        playlist=[
-            ft.VideoMedia("assets/video/video.mp4"),
-        ],
+        playlist=playlist,
         autoplay=True,
-        show_controls=True ,
-        
-        # width=640,
-        # height=360,
+        show_controls=True,
         expand=True,
         on_completed=lambda _: video.play()
     )
@@ -36,19 +38,9 @@ def main(page: ft.Page):
     # Escキーで終了
     def on_keyboard(e: ft.KeyboardEvent):
         if e.key == "Escape":
-            print("Escape key pressed!")
-            page.window_close()
+            page.window.close()
 
     page.on_keyboard_event = on_keyboard
-    page.add(
-        # ft.AppBar(title=ft.Text("動画再生"), bgcolor=ft.colors.SURFACE_VARIANT),
-        video,
-        # ft.Row([
-        #     ft.ElevatedButton("再生", on_click=play_video),
-        #     ft.ElevatedButton("一時停止", on_click=pause_video),
-        #     ft.ElevatedButton("停止", on_click=stop_video),
-        #     ft.ElevatedButton("フルスクリーン切替", on_click=toggle_fullscreen),
-        # ])
-    )
+    page.add(video)
 
 ft.app(target=main)
