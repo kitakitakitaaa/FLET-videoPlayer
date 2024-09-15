@@ -39,8 +39,12 @@ def main(page: ft.Page):
     def on_keyboard(e: ft.KeyboardEvent):
         if e.key == "Escape":
             page.window.close()
+        if e.key == "F":
+            toggle_fullscreen(e)
 
     page.on_keyboard_event = on_keyboard
-    page.add(video)
+    page.add(
+        video
+        )
 
 ft.app(target=main)
