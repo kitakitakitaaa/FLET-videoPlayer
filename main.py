@@ -66,31 +66,34 @@ def main(page: ft.Page):
     config = get_config()
     
     def reload_playlist():
-        # settings.jsonからプレイリストを取得
         video_files = get_playlist_from_settings(config['settings_json_path'])
         print("Reloading playlist:", video_files)
         
-        # Create a new video component with the updated playlist
         new_playlist = [ft.VideoMedia(video_path) for video_path in video_files]
         new_video = ft.Video(
             playlist=new_playlist,
             autoplay=True,
             show_controls=False,
             expand=True,
-            on_completed=lambda _: new_video.play()
+            playlist_mode=ft.PlaylistMode.LOOP,  # プレイリストモードを設定
+            on_completed=lambda _: handle_video_completed(new_video)  # 完了時のハンドラーを追加
         )
         
-        # Remove old video and add new one
         page.controls.clear()
         page.add(new_video)
         page.update()
         
-        # Update the global video reference
         global video
         video = new_video
 
-    # 初期プレイリストの読み込み
+    def handle_video_completed(video_control):
+        # プレイリストの最後まで再生された場合、最初から再生を開始
+        video_control.play()
+        page.update()
+
+    # 初期プレイリストの設定
     video_files = get_playlist_from_settings(config['settings_json_path'])
+    print("Initial playlist:", video_files)
     playlist = [ft.VideoMedia(video_path) for video_path in video_files]
     
     video = ft.Video(
@@ -98,7 +101,8 @@ def main(page: ft.Page):
         autoplay=True,
         show_controls=False,
         expand=True,
-        on_completed=lambda _: video.play()
+        playlist_mode=ft.PlaylistMode.LOOP,  # プレイリストモードを設定
+        on_completed=lambda _: handle_video_completed(video)  # 完了時のハンドラーを追加
     )
 
     def udp_listener():
